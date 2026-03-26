@@ -1230,7 +1230,664 @@
     </div>
   </section>
 
-  <!-- Continue with remaining modules... Due to length, I'll create the structure and you can see the pattern -->
+  <!-- Module 3: How They Talk -->
+  <section class="module" id="module-3" style="background: var(--color-bg)">
+    <div class="module-content">
+      <header class="module-header animate-in">
+        <span class="module-number">03</span>
+        <h1 class="module-title">How They Talk</h1>
+        <p class="module-subtitle">Understanding the data flow between components</p>
+      </header>
+
+      <div class="module-body">
+        <section class="screen animate-in">
+          <h2 class="screen-heading">The Communication Chain</h2>
+          <p>When you ask an AI agent a question, a lot happens behind the scenes. Let's trace the journey of a single question through the system, like following a letter through the postal service.</p>
+
+          <div class="callout callout-info">
+            <div class="callout-icon">📬</div>
+            <div class="callout-content">
+              <strong class="callout-title">The Postal Service Metaphor</strong>
+              <p>Think of Semantic Kernel like a postal system. Your question is a letter. The Kernel is the post office that routes it. The Agent is the mail carrier. Plugins are specialized services (like a translator or researcher) that process parts of the letter. The AI service (OpenAI, Azure) is the brain that reads and writes responses.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen animate-in">
+          <h2 class="screen-heading">A Real Example: Finding Flight Prices</h2>
+          <p>Let's watch what happens when someone asks: "What flights are available from New York to London tomorrow?"</p>
+
+          <div class="pattern-cards">
+            <div class="pattern-card" style="border-top-color: var(--color-actor-1)">
+              <div class="pattern-icon" style="background: var(--color-actor-1)">1️⃣</div>
+              <h3 class="pattern-title">User Input</h3>
+              <p class="pattern-desc">Your question arrives at the Agent</p>
+            </div>
+            <div class="pattern-card" style="border-top-color: var(--color-actor-2)">
+              <div class="pattern-icon" style="background: var(--color-actor-2)">2️⃣</div>
+              <h3 class="pattern-title">Agent Thinks</h3>
+              <p class="pattern-desc">Sends your question to the AI service (like GPT-4) along with descriptions of available tools</p>
+            </div>
+            <div class="pattern-card" style="border-top-color: var(--color-actor-3)">
+              <div class="pattern-icon" style="background: var(--color-actor-3)">3️⃣</div>
+              <h3 class="pattern-title">AI Decides</h3>
+              <p class="pattern-desc">AI says "I need to call search_flights(from='NYC', to='LON', date='tomorrow')"</p>
+            </div>
+            <div class="pattern-card" style="border-top-color: var(--color-actor-4)">
+              <div class="pattern-icon" style="background: var(--color-actor-4)">4️⃣</div>
+              <h3 class="pattern-title">Kernel Routes</h3>
+              <p class="pattern-desc">Kernel finds the search_flights function in your FlightPlugin and calls it</p>
+            </div>
+            <div class="pattern-card" style="border-top-color: var(--color-actor-5)">
+              <div class="pattern-icon" style="background: var(--color-actor-5)">5️⃣</div>
+              <h3 class="pattern-title">Plugin Works</h3>
+              <p class="pattern-desc">Your code queries the flight database and returns results</p>
+            </div>
+            <div class="pattern-card" style="border-top-color: var(--color-actor-1)">
+              <div class="pattern-icon" style="background: var(--color-actor-1)">6️⃣</div>
+              <h3 class="pattern-title">AI Responds</h3>
+              <p class="pattern-desc">AI formats the data into a friendly answer: "Here are 5 flights available..."</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen animate-in">
+          <h2 class="screen-heading">The Magic: Function Calling</h2>
+          <p>The secret sauce is called <span class="term" data-definition="Function calling is when an AI model decides on its own which functions to call and what parameters to use, based on the user's request. It's like having an assistant who knows when to look up information vs. when to send an email, without you telling them explicitly.">function calling</span>. The AI doesn't just generate text — it can decide to invoke your functions!</p>
+
+          <div class="translation-block">
+            <div class="translation-code">
+              <span class="translation-label">CODE</span>
+              <pre><code><span class="code-line">agent = ChatCompletionAgent(</span>
+<span class="code-line">    service=AzureChatCompletion(),</span>
+<span class="code-line">    plugins=[FlightPlugin()],</span>
+<span class="code-line">    arguments=KernelArguments(</span>
+<span class="code-line">        settings=OpenAIChatPromptExecutionSettings(</span>
+<span class="code-line">            function_choice_behavior=FunctionChoiceBehavior.Auto()</span>
+<span class="code-line">        )</span>
+<span class="code-line">    )</span>
+<span class="code-line">)</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">PLAIN ENGLISH</span>
+              <div class="translation-lines">
+                <p class="tl">Create an agent</p>
+                <p class="tl">Connect to Azure's AI brain</p>
+                <p class="tl">Give it access to flight search tools</p>
+                <p class="tl">Pass some settings that control behavior...</p>
+                <p class="tl">These settings are for OpenAI-compatible models...</p>
+                <p class="tl">Tell the AI: "Automatically call functions when you need to" (instead of just making up answers)</p>
+                <p class="tl">Close the settings</p>
+                <p class="tl">Close the arguments</p>
+                <p class="tl">Agent is ready — it will call functions automatically!</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen animate-in">
+          <h2 class="screen-heading">Test Your Understanding</h2>
+
+          <div class="quiz-container">
+            <div class="quiz-question-block" data-question="q3" data-correct="option-b">
+              <h3 class="quiz-question">Your FlightPlugin's search_flights() function is being called, but it's returning data in the wrong format (raw JSON instead of a user-friendly message). Where should you fix this?</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>In the Kernel — it's responsible for formatting all output</span>
+                </button>
+                <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Leave it as is — the AI will automatically convert the JSON into friendly text for the user</span>
+                </button>
+                <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>In the Agent's instructions — tell it explicitly how to format flight data</span>
+                </button>
+              </div>
+              <div class="quiz-feedback" id="q3-feedback"></div>
+            </div>
+
+            <button class="quiz-check-btn" onclick="checkQuiz3()">Check Answer</button>
+            <button class="quiz-reset-btn" onclick="resetQuiz3()">Try Again</button>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Module 4: Plugins Deep Dive -->
+  <section class="module" id="module-4" style="background: var(--color-bg-warm)">
+    <div class="module-content">
+      <header class="module-header animate-in">
+        <span class="module-number">04</span>
+        <h1 class="module-title">The Plugin Ecosystem</h1>
+        <p class="module-subtitle">How to give your AI superpowers with plugins</p>
+      </header>
+
+      <div class="module-body">
+        <section class="screen animate-in">
+          <h2 class="screen-heading">What Are Plugins, Really?</h2>
+          <p>A <span class="term" data-definition="A plugin is a collection of related functions (tools) that you give to an AI agent. Think of it like a toolbox — a DatabasePlugin might have tools for searching, inserting, and updating records, all grouped together because they're related to database work.">plugin</span> is just a collection of functions that share a common purpose. It's like organizing your kitchen: instead of scattering utensils everywhere, you group them — knives in one drawer, spoons in another.</p>
+
+          <div class="translation-block">
+            <div class="translation-code">
+              <span class="translation-label">CODE</span>
+              <pre><code><span class="code-line"><span class="code-keyword">class</span> <span class="code-function">WeatherPlugin</span>:</span>
+<span class="code-line">    <span class="code-decorator">@kernel_function</span>(</span>
+<span class="code-line">        description=<span class="code-string">"Get current weather for a city"</span></span>
+<span class="code-line">    )</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">get_weather</span>(<span class="code-keyword">self</span>, city: <span class="code-keyword">str</span>) -> <span class="code-keyword">str</span>:</span>
+<span class="code-line">        <span class="code-comment"># Call weather API...</span></span>
+<span class="code-line">        <span class="code-keyword">return</span> <span class="code-string">f"Weather in {city}: Sunny, 72°F"</span></span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="code-decorator">@kernel_function</span>(</span>
+<span class="code-line">        description=<span class="code-string">"Get 5-day forecast for a city"</span></span>
+<span class="code-line">    )</span>
+<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">get_forecast</span>(<span class="code-keyword">self</span>, city: <span class="code-keyword">str</span>) -> <span class="code-keyword">str</span>:</span>
+<span class="code-line">        <span class="code-comment"># Call forecast API...</span></span>
+<span class="code-line">        <span class="code-keyword">return</span> <span class="code-string">"5-day forecast..."</span></span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">PLAIN ENGLISH</span>
+              <div class="translation-lines">
+                <p class="tl">Create a plugin class called WeatherPlugin</p>
+                <p class="tl">Mark this as a function the AI can call...</p>
+                <p class="tl">Describe what it does (AI reads this to decide when to use it)</p>
+                <p class="tl">End of the decorator</p>
+                <p class="tl">Define the function — takes a city name as input</p>
+                <p class="tl">Your code here would call a real weather API</p>
+                <p class="tl">Return the weather data as a string</p>
+                <p class="tl">(blank line)</p>
+                <p class="tl">Mark another function...</p>
+                <p class="tl">Describe this one gets forecasts, not current weather</p>
+                <p class="tl">End decorator</p>
+                <p class="tl">Define the forecast function</p>
+                <p class="tl">Call the forecast API</p>
+                <p class="tl">Return the 5-day forecast data</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-accent">
+            <div class="callout-icon">💡</div>
+            <div class="callout-content">
+              <strong class="callout-title">The Power of Descriptions</strong>
+              <p>Those <span class="term" data-definition="The description parameter in @kernel_function tells the AI what the function does and when to use it. Write it in plain English — think of it as leaving instructions for a human assistant. Good: 'Get current weather for a city'. Bad: 'weather_getter'.">description</span> strings aren't just comments — they're critical! The AI reads them to decide which function to call. If you write vague descriptions, the AI will guess wrong. If you write clear, specific descriptions, it'll nail it every time.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen animate-in">
+          <h2 class="screen-heading">Three Ways to Create Plugins</h2>
+          <p>Semantic Kernel gives you flexibility in how you build plugins:</p>
+
+          <div class="pattern-cards">
+            <div class="pattern-card" style="border-top-color: var(--color-actor-1)">
+              <div class="pattern-icon" style="background: var(--color-actor-1)">🐍</div>
+              <h3 class="pattern-title">From Python Classes</h3>
+              <p class="pattern-desc">Write a class, decorate methods with @kernel_function — what we just saw</p>
+            </div>
+            <div class="pattern-card" style="border-top-color: var(--color-actor-2)">
+              <div class="pattern-icon" style="background: var(--color-actor-2)">📁</div>
+              <h3 class="pattern-title">From Prompt Files</h3>
+              <p class="pattern-desc">Create .skprompt.txt files with prompts — AI generates text based on templates</p>
+            </div>
+            <div class="pattern-card" style="border-top-color: var(--color-actor-3)">
+              <div class="pattern-icon" style="background: var(--color-actor-3)">🌐</div>
+              <h3 class="pattern-title">From OpenAPI Specs</h3>
+              <p class="pattern-desc">Point at a REST API's OpenAPI definition — instant plugin from any web service</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen animate-in">
+          <h2 class="screen-heading">Test Your Understanding</h2>
+
+          <div class="quiz-container">
+            <div class="quiz-question-block" data-question="q4" data-correct="option-c">
+              <h3 class="quiz-question">You have 20 different functions for working with customer data (search, create, update, delete, export, etc.). What's the best way to organize them?</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Create 20 separate plugins, one for each function, so they're easy to find</span>
+                </button>
+                <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Put them all in one mega-function that takes an "action" parameter</span>
+                </button>
+                <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Group them into one CustomerPlugin with 20 @kernel_function methods</span>
+                </button>
+              </div>
+              <div class="quiz-feedback" id="q4-feedback"></div>
+            </div>
+
+            <button class="quiz-check-btn" onclick="checkQuiz4()">Check Answer</button>
+            <button class="quiz-reset-btn" onclick="resetQuiz4()">Try Again</button>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Module 5: Multi-Agent Magic -->
+  <section class="module" id="module-5" style="background: var(--color-bg)">
+    <div class="module-content">
+      <header class="module-header animate-in">
+        <span class="module-number">05</span>
+        <h1 class="module-title">Multi-Agent Magic</h1>
+        <p class="module-subtitle">When one AI isn't enough — orchestrating specialist agents</p>
+      </header>
+
+      <div class="module-body">
+        <section class="screen animate-in">
+          <h2 class="screen-heading">The Specialist Team Approach</h2>
+          <p>Sometimes you don't want one general-purpose AI — you want a team of specialists. Like a hospital: you don't go to one doctor for everything. You see a cardiologist for your heart, a dermatologist for your skin, etc.</p>
+
+          <p>Semantic Kernel lets you create multiple agents, each an expert in one area, and have them collaborate.</p>
+        </section>
+
+        <section class="screen animate-in">
+          <h2 class="screen-heading">Real Example: Customer Support Triage</h2>
+          <p>Imagine a customer support system with three specialist agents:</p>
+
+          <div class="icon-rows">
+            <div class="icon-row">
+              <div class="icon-circle" style="background: var(--color-actor-1)">💰</div>
+              <div>
+                <strong>BillingAgent</strong>
+                <p>Expert in charges, payment methods, billing cycles, fees, and payment failures</p>
+              </div>
+            </div>
+            <div class="icon-row">
+              <div class="icon-circle" style="background: var(--color-actor-2)">💵</div>
+              <div>
+                <strong>RefundAgent</strong>
+                <p>Specialist in refund policies, eligibility, processing, and status updates</p>
+              </div>
+            </div>
+            <div class="icon-row">
+              <div class="icon-circle" style="background: var(--color-actor-3)">🎯</div>
+              <div>
+                <strong>TriageAgent</strong>
+                <p>Router that reads user requests and forwards them to the right specialist</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen animate-in">
+          <h2 class="screen-heading">How They Collaborate</h2>
+          <p>Here's the clever part: the TriageAgent treats the other agents as <em>plugins</em>! When you give an agent another agent as a plugin, it can "call" that agent like a function.</p>
+
+          <div class="translation-block">
+            <div class="translation-code">
+              <span class="translation-label">CODE</span>
+              <pre><code><span class="code-line">billing_agent = ChatCompletionAgent(</span>
+<span class="code-line">    name=<span class="code-string">"BillingAgent"</span>,</span>
+<span class="code-line">    instructions=<span class="code-string">"You handle billing issues..."</span></span>
+<span class="code-line">)</span>
+<span class="code-line"></span>
+<span class="code-line">refund_agent = ChatCompletionAgent(</span>
+<span class="code-line">    name=<span class="code-string">"RefundAgent"</span>,</span>
+<span class="code-line">    instructions=<span class="code-string">"You handle refunds..."</span></span>
+<span class="code-line">)</span>
+<span class="code-line"></span>
+<span class="code-line">triage_agent = ChatCompletionAgent(</span>
+<span class="code-line">    name=<span class="code-string">"TriageAgent"</span>,</span>
+<span class="code-line">    instructions=<span class="code-string">"Forward to specialists..."</span>,</span>
+<span class="code-line">    plugins=[billing_agent, refund_agent]</span>
+<span class="code-line">)</span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">PLAIN ENGLISH</span>
+              <div class="translation-lines">
+                <p class="tl">Create a billing specialist agent</p>
+                <p class="tl">Give it a name (for logging/debugging)</p>
+                <p class="tl">Tell it its job: handle billing questions</p>
+                <p class="tl">Done creating billing agent</p>
+                <p class="tl">(blank line)</p>
+                <p class="tl">Create a refund specialist agent</p>
+                <p class="tl">Name it</p>
+                <p class="tl">Tell it to focus on refunds</p>
+                <p class="tl">Done creating refund agent</p>
+                <p class="tl">(blank line)</p>
+                <p class="tl">Create the triage agent (the router)</p>
+                <p class="tl">Name it</p>
+                <p class="tl">Its job: figure out which specialist to ask</p>
+                <p class="tl">Give it the two specialists AS TOOLS it can call!</p>
+                <p class="tl">Triage agent can now "call" the other agents when needed</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-accent">
+            <div class="callout-icon">💡</div>
+            <div class="callout-content">
+              <strong class="callout-title">Agents as Tools</strong>
+              <p>This is a game-changing pattern: <span class="term" data-definition="When you pass an agent as a plugin to another agent, the receiving agent can 'call' the other agent like a function. The AI decides when to delegate work to specialists, just like a manager delegates to team members.">agents can use other agents</span>. It's like delegation in an office — the manager (triage agent) doesn't need to know how to do billing or refunds. It just needs to know who to ask.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen animate-in">
+          <h2 class="screen-heading">Test Your Understanding</h2>
+
+          <div class="quiz-container">
+            <div class="quiz-question-block" data-question="q5" data-correct="option-a">
+              <h3 class="quiz-question">A user asks: "I was charged twice last month, can I get a refund?" The TriageAgent has BillingAgent and RefundAgent as plugins. What happens?</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>TriageAgent calls both agents (billing to investigate, refund to process), then combines their answers</span>
+                </button>
+                <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>TriageAgent randomly picks one agent to handle the whole request</span>
+                </button>
+                <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>All three agents run simultaneously and vote on the answer</span>
+                </button>
+              </div>
+              <div class="quiz-feedback" id="q5-feedback"></div>
+            </div>
+
+            <button class="quiz-check-btn" onclick="checkQuiz5()">Check Answer</button>
+            <button class="quiz-reset-btn" onclick="resetQuiz5()">Try Again</button>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Module 6: Memory and Context -->
+  <section class="module" id="module-6" style="background: var(--color-bg-warm)">
+    <div class="module-content">
+      <header class="module-header animate-in">
+        <span class="module-number">06</span>
+        <h1 class="module-title">Memory Matters</h1>
+        <p class="module-subtitle">How Semantic Kernel remembers conversations and context</p>
+      </header>
+
+      <div class="module-body">
+        <section class="screen animate-in">
+          <h2 class="screen-heading">The Problem: Goldfish Memory</h2>
+          <p>AI models like GPT don't naturally remember previous conversations. Every time you ask a question, it's like talking to someone with amnesia. They can answer the current question, but they don't remember what you said 5 minutes ago.</p>
+
+          <p>Semantic Kernel solves this with <span class="term" data-definition="Memory in Semantic Kernel refers to storing conversation history and context so the AI can reference previous messages. It's like giving the AI a notebook to jot down what you've talked about, so it can look back and remember.">memory systems</span> — ways to store and recall information across conversations.</p>
+        </section>
+
+        <section class="screen animate-in">
+          <h2 class="screen-heading">Two Types of Memory</h2>
+
+          <div class="icon-rows">
+            <div class="icon-row">
+              <div class="icon-circle" style="background: var(--color-actor-1)">💬</div>
+              <div>
+                <strong>Chat History</strong>
+                <p>Short-term memory — the current conversation. "You said X, then I said Y, then you said Z." Built-in and automatic with agents.</p>
+              </div>
+            </div>
+            <div class="icon-row">
+              <div class="icon-circle" style="background: var(--color-actor-2)">🗄️</div>
+              <div>
+                <strong>Semantic Memory</strong>
+                <p>Long-term memory — facts and knowledge stored in a database. Uses vector embeddings to find relevant information based on meaning, not exact keywords.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen animate-in">
+          <h2 class="screen-heading">Chat History: The Easy Part</h2>
+          <p>Agents automatically track conversation history using a <span class="term" data-definition="A thread is a conversation container that stores all messages between the user and agent. Think of it like an email thread — all related messages grouped together so everyone has context.">thread</span>. You don't have to do anything special:</p>
+
+          <div class="translation-block">
+            <div class="translation-code">
+              <span class="translation-label">CODE</span>
+              <pre><code><span class="code-line">thread = ChatHistoryAgentThread()</span>
+<span class="code-line"></span>
+<span class="code-line">response1 = <span class="code-keyword">await</span> agent.get_response(</span>
+<span class="code-line">    messages=<span class="code-string">"My name is Alice"</span>,</span>
+<span class="code-line">    thread=thread</span>
+<span class="code-line">)</span>
+<span class="code-line"></span>
+<span class="code-line">response2 = <span class="code-keyword">await</span> agent.get_response(</span>
+<span class="code-line">    messages=<span class="code-string">"What's my name?"</span>,</span>
+<span class="code-line">    thread=thread  <span class="code-comment"># Same thread!</span></span>
+<span class="code-line">)</span>
+<span class="code-line"><span class="code-comment"># AI will say "Alice" because it remembers</span></span></code></pre>
+            </div>
+            <div class="translation-english">
+              <span class="translation-label">PLAIN ENGLISH</span>
+              <div class="translation-lines">
+                <p class="tl">Create a conversation thread (a container for the chat history)</p>
+                <p class="tl">(blank line)</p>
+                <p class="tl">Send a message to the agent and wait for response...</p>
+                <p class="tl">The message: "My name is Alice"</p>
+                <p class="tl">Use this thread to store the history</p>
+                <p class="tl">Done with first message</p>
+                <p class="tl">(blank line)</p>
+                <p class="tl">Send another message (later in the conversation)...</p>
+                <p class="tl">Ask "What's my name?"</p>
+                <p class="tl">Use the SAME thread — so AI can see previous messages</p>
+                <p class="tl">Done with second message</p>
+                <p class="tl">The AI will remember "Alice" from the first message!</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen animate-in">
+          <h2 class="screen-heading">Semantic Memory: The Advanced Part</h2>
+          <p><span class="term" data-definition="Semantic memory uses vector embeddings (numbers that represent meaning) to store knowledge. When you ask a question, it finds relevant facts based on similarity of meaning, not exact word matches. Like searching 'Italian food' and finding 'pizza', even though they're different words.">Semantic memory</span> is for long-term facts. Instead of remembering every word, it stores the <em>meaning</em> and can find relevant information based on what you're asking about.</p>
+
+          <div class="callout callout-info">
+            <div class="callout-icon">🔍</div>
+            <div class="callout-content">
+              <strong class="callout-title">The Library Analogy</strong>
+              <p>Think of semantic memory like a library with a smart librarian. You don't need to remember the exact title of a book. You can say "I need something about French cooking" and the librarian knows to bring you Julia Child's cookbook — even though you didn't say "Mastering the Art of French Cooking". That's how <span class="term" data-definition="Vector embeddings are numerical representations of text that capture meaning. Similar concepts have similar numbers. This lets computers understand that 'dog' and 'puppy' are related, even though the words are different.">embeddings</span> work: they understand meaning, not just keywords.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen animate-in">
+          <h2 class="screen-heading">Test Your Understanding</h2>
+
+          <div class="quiz-container">
+            <div class="quiz-question-block" data-question="q6" data-correct="option-c">
+              <h3 class="quiz-question">You're building a documentation chatbot. Users ask questions like "How do I reset my password?" The answer is in a 500-page manual. What memory system do you need?</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Chat history — store the entire 500-page manual in the conversation thread</span>
+                </button>
+                <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>No memory needed — just paste the question and the whole manual into GPT every time</span>
+                </button>
+                <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Semantic memory — index the manual, then search for relevant sections based on the question's meaning</span>
+                </button>
+              </div>
+              <div class="quiz-feedback" id="q6-feedback"></div>
+            </div>
+
+            <button class="quiz-check-btn" onclick="checkQuiz6()">Check Answer</button>
+            <button class="quiz-reset-btn" onclick="resetQuiz6()">Try Again</button>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Module 7: The Big Picture -->
+  <section class="module" id="module-7" style="background: var(--color-bg)">
+    <div class="module-content">
+      <header class="module-header animate-in">
+        <span class="module-number">07</span>
+        <h1 class="module-title">The Big Picture</h1>
+        <p class="module-subtitle">Putting it all together — understanding the full architecture</p>
+      </header>
+
+      <div class="module-body">
+        <section class="screen animate-in">
+          <h2 class="screen-heading">The Complete System</h2>
+          <p>Now that you've met all the pieces, let's see how they fit together in a real application. Here's the full architecture of a production Semantic Kernel app:</p>
+
+          <div class="icon-rows">
+            <div class="icon-row">
+              <div class="icon-circle" style="background: var(--color-actor-1)">👤</div>
+              <div>
+                <strong>Your Application</strong>
+                <p>Your code that creates agents, defines plugins, and handles user input</p>
+              </div>
+            </div>
+            <div class="icon-row">
+              <div class="icon-circle" style="background: var(--color-actor-2)">🎭</div>
+              <div>
+                <strong>Semantic Kernel</strong>
+                <p>The framework that orchestrates everything — routes calls, manages state, applies filters</p>
+              </div>
+            </div>
+            <div class="icon-row">
+              <div class="icon-circle" style="background: var(--color-actor-3)">🤖</div>
+              <div>
+                <strong>AI Services</strong>
+                <p>External LLM providers (OpenAI, Azure, Google, etc.) that generate responses and decide which functions to call</p>
+              </div>
+            </div>
+            <div class="icon-row">
+              <div class="icon-circle" style="background: var(--color-actor-4)">🗄️</div>
+              <div>
+                <strong>Your Data & APIs</strong>
+                <p>Databases, web services, file systems — anything your plugins access to get work done</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen animate-in">
+          <h2 class="screen-heading">Why This Architecture Matters</h2>
+          <p>This design gives you three huge advantages:</p>
+
+          <div class="pattern-cards">
+            <div class="pattern-card" style="border-top-color: var(--color-actor-1)">
+              <div class="pattern-icon" style="background: var(--color-actor-1)">🔄</div>
+              <h3 class="pattern-title">Flexibility</h3>
+              <p class="pattern-desc">Swap OpenAI for Azure or local models — just change the connector, not your whole app</p>
+            </div>
+            <div class="pattern-card" style="border-top-color: var(--color-actor-2)">
+              <div class="pattern-icon" style="background: var(--color-actor-2)">🧩</div>
+              <h3 class="pattern-title">Composability</h3>
+              <p class="pattern-desc">Build small, focused plugins and agents, then combine them in powerful ways</p>
+            </div>
+            <div class="pattern-card" style="border-top-color: var(--color-actor-3)">
+              <div class="pattern-icon" style="background: var(--color-actor-3)">🛡️</div>
+              <h3 class="pattern-title">Safety</h3>
+              <p class="pattern-desc">Control what AI can access — give it only the tools it needs, nothing more</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen animate-in">
+          <h2 class="screen-heading">Your Superpower: Directing AI</h2>
+          <p>You've learned how Semantic Kernel works under the hood. Now you can:</p>
+
+          <div class="icon-rows stagger-children">
+            <div class="icon-row animate-in">
+              <div class="icon-circle" style="background: var(--color-success)">✓</div>
+              <div>
+                <strong>Build AI agents with custom tools</strong>
+                <p>Give them access to your data, APIs, and business logic</p>
+              </div>
+            </div>
+            <div class="icon-row animate-in">
+              <div class="icon-circle" style="background: var(--color-success)">✓</div>
+              <div>
+                <strong>Orchestrate multi-agent systems</strong>
+                <p>Create teams of specialist AIs that collaborate to solve complex problems</p>
+              </div>
+            </div>
+            <div class="icon-row animate-in">
+              <div class="icon-circle" style="background: var(--color-success)">✓</div>
+              <div>
+                <strong>Debug and steer AI behavior</strong>
+                <p>Understand when the AI calls the wrong function, give it better descriptions, fix the flow</p>
+              </div>
+            </div>
+            <div class="icon-row animate-in">
+              <div class="icon-circle" style="background: var(--color-success)">✓</div>
+              <div>
+                <strong>Make architectural decisions</strong>
+                <p>Know when to use plugins vs. prompts, chat history vs. semantic memory, single agents vs. multi-agent</p>
+              </div>
+            </div>
+            <div class="icon-row animate-in">
+              <div class="icon-circle" style="background: var(--color-success)">✓</div>
+              <div>
+                <strong>Talk to AI coding assistants effectively</strong>
+                <p>Use precise terms: "Create a KernelPlugin with three @kernel_function methods" instead of "make some helper functions"</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen animate-in">
+          <h2 class="screen-heading">Final Quiz: Putting It All Together</h2>
+
+          <div class="quiz-container">
+            <div class="quiz-question-block" data-question="q7" data-correct="option-b">
+              <h3 class="quiz-question">You're building a personal assistant AI that can check your calendar, send emails, and search the web. You want it to work with both OpenAI and local Ollama models. How do you architect this?</h3>
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Build two separate apps — one for OpenAI, one for Ollama — since they have different APIs</span>
+                </button>
+                <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Create plugins for calendar, email, and web search. Create an agent with those plugins. Use a connector (OpenAI or Ollama) — swap connectors to switch models.</span>
+                </button>
+                <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>Hardcode all the calendar/email/web logic in prompts and send them directly to GPT or Ollama APIs</span>
+                </button>
+              </div>
+              <div class="quiz-feedback" id="q7-feedback"></div>
+            </div>
+
+            <button class="quiz-check-btn" onclick="checkQuiz7()">Check Answer</button>
+            <button class="quiz-reset-btn" onclick="resetQuiz7()">Try Again</button>
+          </div>
+        </section>
+
+        <section class="screen animate-in">
+          <h2 class="screen-heading">You've Mastered Semantic Kernel!</h2>
+          <p style="font-size: var(--text-lg); line-height: var(--leading-loose)">
+            You now understand how Semantic Kernel orchestrates AI agents, plugins, memory, and connectors to build production-ready AI applications. You know the vocabulary, the architecture, and the patterns.
+          </p>
+
+          <div class="callout callout-accent">
+            <div class="callout-icon">🎓</div>
+            <div class="callout-content">
+              <strong class="callout-title">What's Next?</strong>
+              <p>Start building! Try creating a simple agent with one plugin. Then add more plugins. Then create multiple agents. Each step will deepen your understanding. The best way to learn is to build something you care about.</p>
+              <p style="margin-top: var(--space-3)">Check out the <a href="https://github.com/microsoft/semantic-kernel" style="color: var(--color-accent); text-decoration: underline;">Semantic Kernel GitHub</a> for code samples and docs.</p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </section>
 
   <!-- JavaScript -->
   <script>
@@ -1502,6 +2159,186 @@
 
       window.resetQuiz2 = function() {
         const q = document.querySelector('[data-question="q2"]');
+        q.querySelectorAll('.quiz-option').forEach(o => {
+          o.classList.remove('selected', 'correct', 'incorrect');
+          o.disabled = false;
+        });
+        q.querySelector('.quiz-feedback').className = 'quiz-feedback';
+      };
+
+      // Quiz 3
+      window.checkQuiz3 = function() {
+        const q = document.querySelector('[data-question="q3"]');
+        const selected = q.querySelector('.quiz-option.selected');
+        const feedback = q.querySelector('.quiz-feedback');
+        const correctValue = q.dataset.correct;
+
+        if (!selected) {
+          feedback.textContent = 'Pick an answer first!';
+          feedback.className = 'quiz-feedback show error';
+          return;
+        }
+
+        if (selected.dataset.value === correctValue) {
+          selected.classList.add('correct');
+          feedback.innerHTML = '<strong>Exactly!</strong> The AI automatically formats function results into natural language for the user. Your function just needs to return the data — the AI will convert "{ flights: [...] }" into "Here are 5 flights from NYC to London..." That\'s one of the powerful features of function calling.';
+          feedback.className = 'quiz-feedback show success';
+        } else {
+          selected.classList.add('incorrect');
+          q.querySelector(`[data-value="${correctValue}"]`).classList.add('correct');
+          feedback.innerHTML = '<strong>Not quite.</strong> You don\'t need to fix this anywhere. The AI service (GPT, etc.) automatically converts function results into user-friendly text. That\'s why agents are so powerful — you write simple data-returning functions, and the AI handles the presentation layer.';
+          feedback.className = 'quiz-feedback show error';
+        }
+
+        q.querySelectorAll('.quiz-option').forEach(o => o.disabled = true);
+      };
+
+      window.resetQuiz3 = function() {
+        const q = document.querySelector('[data-question="q3"]');
+        q.querySelectorAll('.quiz-option').forEach(o => {
+          o.classList.remove('selected', 'correct', 'incorrect');
+          o.disabled = false;
+        });
+        q.querySelector('.quiz-feedback').className = 'quiz-feedback';
+      };
+
+      // Quiz 4
+      window.checkQuiz4 = function() {
+        const q = document.querySelector('[data-question="q4"]');
+        const selected = q.querySelector('.quiz-option.selected');
+        const feedback = q.querySelector('.quiz-feedback');
+        const correctValue = q.dataset.correct;
+
+        if (!selected) {
+          feedback.textContent = 'Pick an answer first!';
+          feedback.className = 'quiz-feedback show error';
+          return;
+        }
+
+        if (selected.dataset.value === correctValue) {
+          selected.classList.add('correct');
+          feedback.innerHTML = '<strong>Perfect!</strong> Group related functions into one plugin. A CustomerPlugin with 20 methods is clean, organized, and makes sense semantically — all customer operations in one place. The AI can still call individual methods as needed. This is exactly how Semantic Kernel is designed to be used.';
+          feedback.className = 'quiz-feedback show success';
+        } else {
+          selected.classList.add('incorrect');
+          q.querySelector(`[data-value="${correctValue}"]`).classList.add('correct');
+          feedback.innerHTML = '<strong>Not quite.</strong> 20 separate plugins would be chaos — too many to manage, and the AI would struggle to choose between them. A mega-function with an "action" parameter defeats the purpose of function calling (the AI can\'t discover capabilities). Group related functions into meaningful plugins.';
+          feedback.className = 'quiz-feedback show error';
+        }
+
+        q.querySelectorAll('.quiz-option').forEach(o => o.disabled = true);
+      };
+
+      window.resetQuiz4 = function() {
+        const q = document.querySelector('[data-question="q4"]');
+        q.querySelectorAll('.quiz-option').forEach(o => {
+          o.classList.remove('selected', 'correct', 'incorrect');
+          o.disabled = false;
+        });
+        q.querySelector('.quiz-feedback').className = 'quiz-feedback';
+      };
+
+      // Quiz 5
+      window.checkQuiz5 = function() {
+        const q = document.querySelector('[data-question="q5"]');
+        const selected = q.querySelector('.quiz-option.selected');
+        const feedback = q.querySelector('.quiz-feedback');
+        const correctValue = q.dataset.correct;
+
+        if (!selected) {
+          feedback.textContent = 'Pick an answer first!';
+          feedback.className = 'quiz-feedback show error';
+          return;
+        }
+
+        if (selected.dataset.value === correctValue) {
+          selected.classList.add('correct');
+          feedback.innerHTML = '<strong>Yes!</strong> The TriageAgent is smart enough to call both specialists. It might first ask BillingAgent to investigate the double-charge, then ask RefundAgent about the refund policy, then combine both answers into a coherent response. That\'s the power of multi-agent systems — specialized knowledge working together.';
+          feedback.className = 'quiz-feedback show success';
+        } else {
+          selected.classList.add('incorrect');
+          q.querySelector(`[data-value="${correctValue}"]`).classList.add('correct');
+          feedback.innerHTML = '<strong>Not quite.</strong> The AI doesn\'t pick randomly or run agents in parallel voting. It strategically decides which specialists to consult based on the question. In this case, it spans both billing (investigation) and refunds (processing), so it would call both agents and synthesize their responses.';
+          feedback.className = 'quiz-feedback show error';
+        }
+
+        q.querySelectorAll('.quiz-option').forEach(o => o.disabled = true);
+      };
+
+      window.resetQuiz5 = function() {
+        const q = document.querySelector('[data-question="q5"]');
+        q.querySelectorAll('.quiz-option').forEach(o => {
+          o.classList.remove('selected', 'correct', 'incorrect');
+          o.disabled = false;
+        });
+        q.querySelector('.quiz-feedback').className = 'quiz-feedback';
+      };
+
+      // Quiz 6
+      window.checkQuiz6 = function() {
+        const q = document.querySelector('[data-question="q6"]');
+        const selected = q.querySelector('.quiz-option.selected');
+        const feedback = q.querySelector('.quiz-feedback');
+        const correctValue = q.dataset.correct;
+
+        if (!selected) {
+          feedback.textContent = 'Pick an answer first!';
+          feedback.className = 'quiz-feedback show error';
+          return;
+        }
+
+        if (selected.dataset.value === correctValue) {
+          selected.classList.add('correct');
+          feedback.innerHTML = '<strong>Exactly right!</strong> Semantic memory is perfect for this. You\'d index the 500-page manual as embeddings, then when someone asks about password resets, it searches for the most relevant sections based on meaning. Chat history is for conversations, not knowledge bases. Pasting the whole manual every time would be slow and expensive.';
+          feedback.className = 'quiz-feedback show success';
+        } else {
+          selected.classList.add('incorrect');
+          q.querySelector(`[data-value="${correctValue}"]`).classList.add('correct');
+          feedback.innerHTML = '<strong>Not quite.</strong> Chat history is for tracking conversations, not storing large documents. Pasting a 500-page manual into every query would exceed token limits and cost a fortune. Semantic memory (vector search) is designed exactly for this: store knowledge once, search it based on meaning.';
+          feedback.className = 'quiz-feedback show error';
+        }
+
+        q.querySelectorAll('.quiz-option').forEach(o => o.disabled = true);
+      };
+
+      window.resetQuiz6 = function() {
+        const q = document.querySelector('[data-question="q6"]');
+        q.querySelectorAll('.quiz-option').forEach(o => {
+          o.classList.remove('selected', 'correct', 'incorrect');
+          o.disabled = false;
+        });
+        q.querySelector('.quiz-feedback').className = 'quiz-feedback';
+      };
+
+      // Quiz 7
+      window.checkQuiz7 = function() {
+        const q = document.querySelector('[data-question="q7"]');
+        const selected = q.querySelector('.quiz-option.selected');
+        const feedback = q.querySelector('.quiz-feedback');
+        const correctValue = q.dataset.correct;
+
+        if (!selected) {
+          feedback.textContent = 'Pick an answer first!';
+          feedback.className = 'quiz-feedback show error';
+          return;
+        }
+
+        if (selected.dataset.value === correctValue) {
+          selected.classList.add('correct');
+          feedback.innerHTML = '<strong>Perfect! You\'ve mastered it!</strong> This is the ideal Semantic Kernel architecture: plugins contain your business logic (calendar, email, web search), an agent uses those plugins, and a connector talks to the AI service. Swap the connector (OpenAIChatCompletion() vs. OllamaChatCompletion()) and everything else stays the same. That\'s the power of abstraction!';
+          feedback.className = 'quiz-feedback show success';
+        } else {
+          selected.classList.add('incorrect');
+          q.querySelector(`[data-value="${correctValue}"]`).classList.add('correct');
+          feedback.innerHTML = '<strong>Not quite.</strong> Semantic Kernel\'s whole purpose is to abstract away AI service differences. You don\'t build separate apps (option A) or hardcode everything in prompts (option C). You build plugins once, use a connector, and switch AI providers by changing one line of code. That\'s the architecture you just learned!';
+          feedback.className = 'quiz-feedback show error';
+        }
+
+        q.querySelectorAll('.quiz-option').forEach(o => o.disabled = true);
+      };
+
+      window.resetQuiz7 = function() {
+        const q = document.querySelector('[data-question="q7"]');
         q.querySelectorAll('.quiz-option').forEach(o => {
           o.classList.remove('selected', 'correct', 'incorrect');
           o.disabled = false;
